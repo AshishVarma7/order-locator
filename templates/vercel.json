@@ -4,17 +4,11 @@
         {
             "src": "main.go",
             "use": "@vercel/go"
-        },
-        {
-            "src": "templates/*",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "static/*",
-            "use": "@vercel/static"
         }
     ],
     "routes": [
+        { "src": "/static/(.*)", "dest": "/static/$1" },
+        { "src": "/templates/(.*)", "dest": "/templates/$1" },
         { "src": "/(.*)", "dest": "/main.go" }
     ]
 }
