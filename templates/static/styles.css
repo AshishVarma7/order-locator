@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+}
+
+form {
+    margin: 0 auto;
+    width: 300px;
+    padding: 1em;   
+    border: 1px solid #ccc;
+    border-radius: 1em;
+}
+
+label {
+    margin-top: 1em;
+}
+
+input, textarea {
+    margin-bottom: 1em;
+    width: 100%;
+    padding: .5em;
+}

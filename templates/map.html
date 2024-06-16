@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Locator</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1Rz_xGPNYMO7WyP1wYdVzVoMOCO_UUtQ"></script>
+    <script>
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: {lat: -34.397, lng: 150.644} // Default center if no orders found
+            });
+
+            // Define orders JavaScript variable using Go template syntax
+            var orders = JSON.parse(document.getElementById('orders-data').textContent);
+            var geocoder = new google.maps.Geocoder();
+
+            orders.forEach(order => {
+                geocoder.geocode({ address: order.address }, function(results, status) {
+                    if (status === 'OK') {
+                        new google.maps.Marker({
+                            position: results[0].geometry.location,
+                            map: map,
+                            title: order.name
+                        });
+                    } else {
+                        console.error('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <h1>Order Locator</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+    <script type="application/json" id="orders-data">{{ . }}</script>
+</body>
+</html>
