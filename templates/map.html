@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Locator</title>
+    <link rel="stylesheet" href="/static/map.css">
+    <style>
+        #map-container {
+            width: 100%;
+            height: 100vh; /* Full viewport height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        #map {
+            width: 90%;
+            height: 90%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1Rz_xGPNYMO7WyP1wYdVzVoMOCO_UUtQ&callback=initMap" async defer></script>
     <script>
         function initMap() {
@@ -12,20 +31,27 @@
                 center: {lat: -34.397, lng: 150.644} // Default center if no orders found
             });
 
+            // Fetch orders and locations data asynchronously
             fetch('/api/orders')
                 .then(response => response.json())
                 .then(data => {
                     var orders = data.Orders;
                     var locations = data.Locations;
 
+                    // Process each order and location
                     locations.forEach(function(location, index) {
                         var order = orders[index];
                         var marker = new google.maps.Marker({
                             position: {lat: location.lat, lng: location.lng},
                             map: map,
-                            title: order.name
+                            title: order.Name // Ensure you use the correct field name
                         });
                     });
+
+                    // Center map on the first order's location
+                    if (locations.length > 0) {
+                        map.setCenter({ lat: locations[0].lat, lng: locations[0].lng });
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
@@ -33,8 +59,9 @@
         }
     </script>
 </head>
-<body onload="initMap()">
-    <h1>Order Locator</h1>
-    <div id="map" style="height: 500px; width: 100%;"></div>
+<body>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
 </body>
 </html>

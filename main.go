@@ -108,14 +108,63 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/map", http.StatusSeeOther)
 }
 
-// mapHandler handles rendering the map HTML page
+// mapHandler handles rendering the map HTML page with geocoded addresses
 func mapHandler(w http.ResponseWriter, r *http.Request) {
+	// Fetch orders from MongoDB
+	cursor, err := ordersCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var orders []Order
+	for cursor.Next(context.Background()) {
+		var order Order
+		if err := cursor.Decode(&order); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		orders = append(orders, order)
+	}
+	if err := cursor.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Geocode addresses
+	var locations []map[string]float64
+	for _, order := range orders {
+		location, err := geocodeAddress(order.Address)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		locations = append(locations, location)
+	}
+
+	// Render map page with orders data and geocoded locations
+	type PageData struct {
+		Orders    []Order
+		Locations []map[string]float64
+	}
+	data := PageData{
+		Orders:    orders,
+		Locations: locations,
+	}
+
 	tmpl, err := template.ParseFiles("templates/map.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+
+	// Execute template with data
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // ordersAPIHandler handles returning JSON data of orders and locations
