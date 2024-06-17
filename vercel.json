@@ -5,14 +5,12 @@
       "src": "main.go",
       "use": "@vercel/go",
       "config": {
-        "func": "Handler"
+        "includeFiles": ["static/**", "templates/**"]
       }
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "main.go"
-    }
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/(.*)", "dest": "main.go" }
   ]
 }
