@@ -1,0 +1,9 @@
+[build]
+  buildCommand = "go build -o app main.go"
+
+[start]
+  startCommand = "./app"
+
+[env]
+  MONGO_URI = "mongodb://localhost:27017"
+  GOOGLE_MAPS_API_KEY = "AIzaSyA1Rz_xGPNYMO7WyP1wYdVzVoMOCO_UUtQ"
