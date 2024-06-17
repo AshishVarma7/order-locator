@@ -1,8 +1,8 @@
 [build]
-  buildCommand = "go build -o app main.go"
+  buildCommand = "go build -o out main.go"
 
 [start]
-  startCommand = "./app"
+  startCommand = "./out"
 
 [env]
   MONGO_URI = "mongodb://localhost:27017"
