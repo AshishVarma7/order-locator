@@ -26,7 +26,7 @@ var ordersCollection *mongo.Collection
 
 func main() {
 
-	clientOptions := options.Client().ApplyURI("mongodb://mongo:rVzpeMujXatIYSWXQAIeiiAwdQVfbDbL@monorail.proxy.rlwy.net:36392")
+	clientOptions := options.Client().ApplyURI("MONGO_URI")
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -203,7 +203,7 @@ func ordersAPIHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func geocodeAddress(address string) (map[string]float64, error) {
-	apiKey := "AIzaSyA1Rz_xGPNYMO7WyP1wYdVzVoMOCO_UUtQ"
+	apiKey := "GOOGLE_MAPS_API_KEY"
 	geocodeURL := fmt.Sprintf("https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s", url.QueryEscape(address), apiKey)
 
 	resp, err := http.Get(geocodeURL)
