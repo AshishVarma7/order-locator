@@ -5,5 +5,5 @@
   startCommand = "./out"
 
 [env]
-  MONGO_URI = "mongodb://localhost:27017/order_db"
+  MONGO_URI = "mongodb://mongo:rVzpeMujXatIYSWXQAIeiiAwdQVfbDbL@monorail.proxy.rlwy.net:36392"
   GOOGLE_MAPS_API_KEY = "AIzaSyA1Rz_xGPNYMO7WyP1wYdVzVoMOCO_UUtQ"
