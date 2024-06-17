@@ -15,7 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Order represents an order with name and address
 type Order struct {
 	Name                   string `bson:"name"`
 	Phone                  string `bson:"phone"`
@@ -26,7 +25,7 @@ type Order struct {
 var ordersCollection *mongo.Collection
 
 func main() {
-	// Initialize MongoDB client
+
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
@@ -34,32 +33,27 @@ func main() {
 	}
 	defer client.Disconnect(context.Background())
 
-	// Ping the MongoDB server
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Set up collection
 	ordersCollection = client.Database("order_db").Collection("orders")
 
-	// Define HTTP handlers
 	http.HandleFunc("/", formHandler)
 	http.HandleFunc("/submit", submitHandler)
 	http.HandleFunc("/map", mapHandler)
-	http.HandleFunc("/api/orders", ordersAPIHandler) // Endpoint for orders JSON data
+	http.HandleFunc("/api/orders", ordersAPIHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // Default port if not specified
+		port = "8080"
 	}
 	log.Printf("Server listening on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-// formHandler handles rendering the form HTML page
 func formHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("templates/form.html")
 	if err != nil {
@@ -69,27 +63,23 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-// submitHandler handles form submission and stores data in MongoDB
 func submitHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Parse form data
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Extract form values
 	name := r.FormValue("name")
 	phone := r.FormValue("phone")
 	address := r.FormValue("address")
 	preferableDeliveryTime := r.FormValue("preferable_delivery_time")
 
-	// Create Order object
 	order := Order{
 		Name:                   name,
 		Phone:                  phone,
@@ -97,20 +87,17 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 		PreferableDeliveryTime: preferableDeliveryTime,
 	}
 
-	// Insert into MongoDB
 	_, err = ordersCollection.InsertOne(context.Background(), order)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Redirect to the map page
 	http.Redirect(w, r, "/map", http.StatusSeeOther)
 }
 
-// mapHandler handles rendering the map HTML page with geocoded addresses
 func mapHandler(w http.ResponseWriter, r *http.Request) {
-	// Fetch orders from MongoDB
+
 	cursor, err := ordersCollection.Find(context.Background(), bson.M{})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -132,7 +119,6 @@ func mapHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Geocode addresses
 	var locations []map[string]float64
 	for _, order := range orders {
 		location, err := geocodeAddress(order.Address)
@@ -143,7 +129,6 @@ func mapHandler(w http.ResponseWriter, r *http.Request) {
 		locations = append(locations, location)
 	}
 
-	// Render map page with orders data and geocoded locations
 	type PageData struct {
 		Orders    []Order
 		Locations []map[string]float64
@@ -159,7 +144,6 @@ func mapHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute template with data
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -167,9 +151,8 @@ func mapHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ordersAPIHandler handles returning JSON data of orders and locations
 func ordersAPIHandler(w http.ResponseWriter, r *http.Request) {
-	// Fetch orders from MongoDB
+
 	cursor, err := ordersCollection.Find(context.Background(), bson.M{})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -191,7 +174,6 @@ func ordersAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Geocode addresses to get locations
 	var locations []map[string]float64
 	for _, order := range orders {
 		location, err := geocodeAddress(order.Address)
@@ -202,7 +184,6 @@ func ordersAPIHandler(w http.ResponseWriter, r *http.Request) {
 		locations = append(locations, location)
 	}
 
-	// Create a data structure for JSON response
 	data := struct {
 		Orders    []Order
 		Locations []map[string]float64
@@ -211,19 +192,16 @@ func ordersAPIHandler(w http.ResponseWriter, r *http.Request) {
 		Locations: locations,
 	}
 
-	// Marshal data to JSON
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Set content type and send response
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 }
 
-// geocodeAddress fetches geocoding data from Google Maps API
 func geocodeAddress(address string) (map[string]float64, error) {
 	apiKey := "AIzaSyA1Rz_xGPNYMO7WyP1wYdVzVoMOCO_UUtQ"
 	geocodeURL := fmt.Sprintf("https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s", url.QueryEscape(address), apiKey)

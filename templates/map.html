@@ -8,7 +8,7 @@
     <style>
         #map-container {
             width: 100%;
-            height: 100vh; /* Full viewport height */
+            height: 100vh; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,27 +28,27 @@
         function initMap() {
             var map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 10,
-                center: {lat: -34.397, lng: 150.644} // Default center if no orders found
+                center: {lat: 0.0, lng: 0.0} 
             });
 
-            // Fetch orders and locations data asynchronously
+
             fetch('/api/orders')
                 .then(response => response.json())
                 .then(data => {
                     var orders = data.Orders;
                     var locations = data.Locations;
 
-                    // Process each order and location
+
                     locations.forEach(function(location, index) {
                         var order = orders[index];
                         var marker = new google.maps.Marker({
                             position: {lat: location.lat, lng: location.lng},
                             map: map,
-                            title: order.Name // Ensure you use the correct field name
+                            title: order.Name 
                         });
                     });
 
-                    // Center map on the first order's location
+
                     if (locations.length > 0) {
                         map.setCenter({ lat: locations[0].lat, lng: locations[0].lng });
                     }
