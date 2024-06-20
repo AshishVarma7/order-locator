@@ -26,7 +26,7 @@ var ordersCollection *mongo.Collection
 
 func main() {
 
-	clientOptions := options.Client().ApplyURI("mongodb://mongo:rVzpeMujXatIYSWXQAIeiiAwdQVfbDbL@monorail.proxy.rlwy.net:36392")
+	clientOptions := options.Client().ApplyURI("mongodb+srv://ashish:V%40Mongodb.1@cluster0.ldtmehf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
